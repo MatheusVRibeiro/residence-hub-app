@@ -1,12 +1,50 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginScreen } from "@/components/LoginScreen";
+import { Dashboard } from "@/components/Dashboard";
+import { ReservationsScreen } from "@/components/ReservationsScreen";
+import { NotificationsScreen } from "@/components/NotificationsScreen";
+import { ProfileScreen } from "@/components/ProfileScreen";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 const Index = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'reservations' | 'notifications' | 'profile'>('dashboard');
+
+  const handleLogin = (email: string) => {
+    setUserEmail(email);
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserEmail("");
+    setActiveTab('dashboard');
+  };
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return <Dashboard userEmail={userEmail} />;
+      case 'reservations':
+        return <ReservationsScreen />;
+      case 'notifications':
+        return <NotificationsScreen />;
+      case 'profile':
+        return <ProfileScreen userEmail={userEmail} onLogout={handleLogout} />;
+      default:
+        return <Dashboard userEmail={userEmail} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="relative">
+      {renderScreen()}
+      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };

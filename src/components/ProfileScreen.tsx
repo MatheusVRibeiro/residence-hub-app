@@ -138,11 +138,6 @@ export const ProfileScreen = ({ userEmail, onLogout }: ProfileScreenProps) => {
             </Button>
             
             <Button variant="outline" className="w-full justify-start gap-3" size="lg">
-              <CreditCard className="h-4 w-4" />
-              Histórico de Pagamentos
-            </Button>
-            
-            <Button variant="outline" className="w-full justify-start gap-3" size="lg">
               <Shield className="h-4 w-4" />
               Alterar Senha
             </Button>

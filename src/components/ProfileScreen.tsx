@@ -1,159 +1,131 @@
-import { User, MapPin, Phone, Mail, CreditCard, Settings, LogOut, Bell, Shield } from "lucide-react";
+import React from 'react';
+import { User, Car, FileText, Settings, HelpCircle, LogOut, ChevronRight, Mail, Phone, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface ProfileScreenProps {
   userEmail: string;
   onLogout: () => void;
 }
 
-export const ProfileScreen = ({ userEmail, onLogout }: ProfileScreenProps) => {
-  const userName = userEmail.split('@')[0];
-  const userInitials = userName.slice(0, 2).toUpperCase();
+// Mock Data
+const userProfile = {
+  name: "Ana Clara",
+  email: "ana.clara@email.com",
+  phone: "(11) 98765-4321",
+  apartment: "Apto 72",
+  block: "Bloco B",
+  avatarUrl: "https://i.pravatar.cc/150?u=ana",
+  initials: "AC",
+  vehicles: [
+    { id: 1, model: "Honda Civic", plate: "BRA2E19", type: "Carro" },
+    { id: 2, model: "Honda PCX", plate: "RIO2A18", type: "Moto" },
+  ],
+  documents: [
+    { id: 1, name: "Regimento Interno.pdf", category: "Regras" },
+    { id: 2, name: "Ata da Última Assembleia.pdf", category: "Assembleias" },
+  ]
+};
 
-  // Mock data - em produção, viria da API
-  const userInfo = {
-    name: "João Silva Santos",
-    email: userEmail,
-    phone: "(11) 99999-9999",
-    apartment: "Apto 502 - Bloco A",
-    building: "Residencial Jardim das Flores",
-    memberSince: "Janeiro 2022"
-  };
+export const ProfileScreen = ({ onLogout }: ProfileScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
       <div className="max-w-md mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-4 pt-4">
-          <Avatar className="w-20 h-20 mx-auto">
-            <AvatarFallback className="text-lg font-semibold bg-primary text-primary-foreground">
-              {userInitials}
+        {/* Cabeçalho do Perfil */}
+        <div className="flex flex-col items-center space-y-2 pt-4">
+          <Avatar className="w-24 h-24 border-4 border-primary/20">
+            <AvatarFallback className="text-3xl font-semibold bg-primary/10 text-primary">
+              {userProfile.initials}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{userInfo.name}</h1>
-            <p className="text-muted-foreground">{userInfo.apartment}</p>
-            <p className="text-sm text-muted-foreground">{userInfo.building}</p>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground">{userProfile.name}</h1>
+            <p className="text-muted-foreground">{userProfile.apartment} - {userProfile.block}</p>
           </div>
         </div>
 
-        {/* Informações Pessoais */}
-        <Card className="app-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
-              Informações Pessoais
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-foreground">E-mail</p>
-                <p className="text-xs text-muted-foreground">{userInfo.email}</p>
+        {/* Seções com Accordion */}
+        <Accordion type="single" collapsible className="w-full">
+          {/* Meus Dados */}
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="text-lg font-semibold">
+              <div className="flex items-center gap-3">
+                <User className="h-5 w-5 text-primary" /> Meus Dados
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
-              <Phone className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Telefone</p>
-                <p className="text-xs text-muted-foreground">{userInfo.phone}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Endereço</p>
-                <p className="text-xs text-muted-foreground">{userInfo.apartment}</p>
-                <p className="text-xs text-muted-foreground">{userInfo.building}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-background border border-border">
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium text-foreground">Membro desde</p>
-                <p className="text-xs text-muted-foreground">{userInfo.memberSince}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              <InfoItem icon={Mail} value={userProfile.email} />
+              <InfoItem icon={Phone} value={userProfile.phone} />
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Configurações */}
-        <Card className="app-card">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Settings className="h-5 w-5 text-primary" />
-              Configurações
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+          {/* Meus Veículos */}
+          <AccordionItem value="item-2">
+            <AccordionTrigger className="text-lg font-semibold">
               <div className="flex items-center gap-3">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Notificações Push</p>
-                  <p className="text-xs text-muted-foreground">Receber avisos importantes</p>
-                </div>
+                <Car className="h-5 w-5 text-primary" /> Meus Veículos
               </div>
-              <Switch defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">E-mail</p>
-                  <p className="text-xs text-muted-foreground">Receber avisos por e-mail</p>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+              {userProfile.vehicles.map(vehicle => (
+                <div key={vehicle.id} className="p-3 rounded-lg bg-background border border-border flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{vehicle.model}</p>
+                    <p className="text-xs text-muted-foreground">{vehicle.plate}</p>
+                  </div>
+                  <Badge variant="outline">{vehicle.type}</Badge>
                 </div>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">Autenticação Biométrica</p>
-                  <p className="text-xs text-muted-foreground">Login com impressão digital</p>
-                </div>
-              </div>
-              <Switch />
-            </div>
-          </CardContent>
-        </Card>
+              ))}
+               <Button variant="outline" size="sm" className="w-full mt-2">Adicionar Veículo</Button>
+            </AccordionContent>
+          </AccordionItem>
 
-        {/* Ações */}
-        <Card className="app-card">
-          <CardContent className="p-4 space-y-3">
-            <Button variant="outline" className="w-full justify-start gap-3" size="lg">
-              <Settings className="h-4 w-4" />
-              Editar Perfil
+          {/* Documentos */}
+          <AccordionItem value="item-3">
+            <AccordionTrigger className="text-lg font-semibold">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" /> Documentos
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-3 pt-2">
+               {userProfile.documents.map(doc => (
+                <div key={doc.id} className="p-3 rounded-lg bg-background border border-border flex justify-between items-center cursor-pointer hover:bg-primary/5">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{doc.name}</p>
+                    <p className="text-xs text-muted-foreground">{doc.category}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        
+        {/* Botões de Ação */}
+        <div className="space-y-2 pt-4">
+            <Button variant="outline" className="w-full justify-start gap-3 text-base py-6">
+              <Settings className="h-5 w-5" /> Configurações
             </Button>
-            
-            <Button variant="outline" className="w-full justify-start gap-3" size="lg">
-              <Shield className="h-4 w-4" />
-              Alterar Senha
+            <Button variant="outline" className="w-full justify-start gap-3 text-base py-6">
+              <HelpCircle className="h-5 w-5" /> Ajuda e Suporte
             </Button>
-            
-            <Button 
-              variant="destructive" 
-              className="w-full justify-start gap-3" 
-              size="lg"
-              onClick={onLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              Sair da Conta
+            <Button variant="destructive" className="w-full justify-start gap-3 text-base py-6" onClick={onLogout}>
+              <LogOut className="h-5 w-5" /> Sair da Conta
             </Button>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
 };
+
+// Componente auxiliar para itens de informação
+const InfoItem = ({ icon: Icon, value }) => (
+  <div className="flex items-center gap-3 text-sm p-3 rounded-lg bg-background border border-border">
+    <Icon className="h-4 w-4 text-muted-foreground" />
+    <span className="text-foreground">{value}</span>
+  </div>
+);

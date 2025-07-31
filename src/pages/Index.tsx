@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { LoginScreen } from "@/components/LoginScreen";
-import { Dashboard } from "@/components/Dashboard";
+import { DashboardMorador } from "@/components/DashboardMorador";
 import { ReservationsScreen } from "@/components/ReservationsScreen";
 import { NotificationsScreen } from "@/components/NotificationsScreen";
 import { ProfileScreen } from "@/components/ProfileScreen";
+import { PackagesScreen } from "@/components/PackagesScreen";
+import { IssueReportScreen } from "@/components/IssueReportScreen";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
-type Tab = 'dashboard' | 'reservations' | 'notifications' | 'profile';
+// ADICIONE "EXPORT" AQUI PARA COMPARTILHAR O TIPO
+export type Tab = 'dashboard' | 'reservations' | 'notifications' | 'profile' | 'packages' | 'issues';
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,15 +38,19 @@ const Index = () => {
   const renderScreen = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard userEmail={userEmail} onNavigate={handleNavigation} />;
+        return <DashboardMorador onNavigate={handleNavigation} />;
       case 'reservations':
         return <ReservationsScreen />;
       case 'notifications':
         return <NotificationsScreen />;
       case 'profile':
         return <ProfileScreen userEmail={userEmail} onLogout={handleLogout} />;
+      case 'packages':
+        return <PackagesScreen />;
+      case 'issues':
+        return <IssueReportScreen />;
       default:
-        return <Dashboard userEmail={userEmail} onNavigate={handleNavigation} />;
+        return <DashboardMorador onNavigate={handleNavigation} />;
     }
   };
 

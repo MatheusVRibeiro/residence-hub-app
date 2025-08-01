@@ -3,11 +3,12 @@ import { Calendar, Clock, Users, X, Building, ListChecks, Info, Copy } from "luc
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 // Interfaces
@@ -113,9 +114,31 @@ export const ReservationsScreen = () => {
                           <div className="text-sm text-muted-foreground flex items-center gap-2"><Clock size={14} /> Horário: {res.time}</div>
                           <div className="text-sm text-muted-foreground flex items-center gap-2"><Copy size={14} /> Cód: {res.confirmationCode}</div>
                           <div className="text-sm text-muted-foreground flex items-start gap-2"><Info size={14} className="mt-0.5"/> Regras: {environments.find(e => e.name === res.environmentName)?.rules.join(' ')}</div>
-                          <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => handleCancelReservation(res.id)}>
-                            <X className="h-4 w-4 mr-2" /> Cancelar Reserva
-                          </Button>
+                          
+                          {/* --- ALTERAÇÃO AQUI: AlertDialog adicionado --- */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm" className="w-full mt-2">
+                                <X className="h-4 w-4 mr-2" /> Cancelar Reserva
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta ação não pode ser desfeita. A sua reserva para o espaço <strong>{res.environmentName}</strong> será permanentemente cancelada.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Voltar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleCancelReservation(res.id)}>
+                                  Sim, cancelar reserva
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          {/* --- FIM DA ALTERAÇÃO --- */}
+
                         </div>
                       </AccordionContent>
                     </AccordionItem>

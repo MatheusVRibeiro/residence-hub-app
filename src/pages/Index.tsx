@@ -8,7 +8,7 @@ import { PackagesScreen } from "@/components/PackagesScreen";
 import { IssueReportScreen } from "@/components/IssueReportScreen";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
-// ADICIONE "EXPORT" AQUI PARA COMPARTILHAR O TIPO
+// Este tipo agora é a "fonte da verdade" para a navegação do app
 export type Tab = 'dashboard' | 'reservations' | 'notifications' | 'profile' | 'packages' | 'issues';
 
 const Index = () => {

@@ -1,23 +1,26 @@
 import { useState } from "react";
-import { Calendar, Clock, Users, X, Building } from "lucide-react";
+import { Calendar, Clock, Users, X, Building, ListChecks, Info, Copy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 
+// Interfaces
 interface Environment {
-  id: number; name: string; capacity: number; description: string; available: boolean;
+  id: number; name: string; capacity: number; description: string; available: boolean; rules: string[];
 }
 interface Reservation {
-  id: number; environmentName: string; date: string; time: string;
+  id: number; environmentName: string; date: string; time: string; confirmationCode: string;
 }
 
 export const ReservationsScreen = () => {
   const { toast } = useToast();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const [reservationDate, setReservationDate] = useState("");
   const [reservationTime, setReservationTime] = useState("");
@@ -25,27 +28,22 @@ export const ReservationsScreen = () => {
 
   // Mock data
   const [environments] = useState<Environment[]>([
-    { id: 1, name: "Salão de Festas", capacity: 50, description: "Espaço amplo para eventos.", available: true },
-    { id: 2, name: "Churrasqueira", capacity: 20, description: "Área gourmet com churrasqueira.", available: true },
-    { id: 3, name: "Quadra de Tênis", capacity: 4, description: "Quadra oficial para esportes.", available: false },
-    { id: 4, name: "Piscina", capacity: 30, description: "Lazer e recreação aquática.", available: true },
-    { id: 5, name: "Academia", capacity: 15, description: "Espaço fitness com equipamentos.", available: true }
+    { id: 1, name: "Salão de Festas", capacity: 50, description: "Espaço amplo para eventos.", available: true, rules: ["Limpeza obrigatória após o uso.", "Som permitido até as 22h."] },
+    { id: 2, name: "Churrasqueira", capacity: 20, description: "Área gourmet com churrasqueira.", available: true, rules: ["Levar próprio carvão.", "Não deixar restos de comida."] },
+    { id: 3, name: "Quadra de Tênis", capacity: 4, description: "Quadra oficial para esportes.", available: false, rules: ["Uso de calçado apropriado.", "Máximo de 1h por reserva."] },
   ]);
-
   const [myReservations, setMyReservations] = useState<Reservation[]>([
-    { id: 1, environmentName: "Salão de Festas", date: "2025-08-15", time: "19:00" },
-    { id: 2, environmentName: "Churrasqueira", date: "2025-08-22", time: "12:00" }
+    { id: 1, environmentName: "Salão de Festas", date: "2025-08-15", time: "19:00", confirmationCode: "FESTA-A7B2" },
+    { id: 2, environmentName: "Churrasqueira", date: "2025-08-22", time: "12:00", confirmationCode: "CHURRAS-C3D9" }
   ]);
 
-  const handleOpenModal = (environment: Environment) => {
-    setSelectedEnvironment(environment);
-    setIsModalOpen(true);
+  const handleOpenDrawer = (environment: Environment) => {
+    setSelectedEnvironment(environment); setIsDrawerOpen(true);
   };
-
+  
   const handleConfirmReservation = async () => {
     if (!selectedEnvironment || !reservationDate || !reservationTime) {
-      toast({ title: "Erro", description: "Por favor, preencha data e horário.", variant: "destructive" });
-      return;
+      toast({ title: "Erro", description: "Por favor, preencha data e horário.", variant: "destructive" }); return;
     }
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -54,13 +52,11 @@ export const ReservationsScreen = () => {
       environmentName: selectedEnvironment.name,
       date: reservationDate,
       time: reservationTime,
+      confirmationCode: `${selectedEnvironment.name.substring(0,4).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
     };
-    setMyReservations(prev => [...prev, newReservation]);
+    setMyReservations(prev => [...prev, newReservation].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     toast({ title: "Reserva confirmada!", description: `${selectedEnvironment.name} reservado.` });
-    setIsModalOpen(false);
-    setReservationDate("");
-    setReservationTime("");
-    setIsLoading(false);
+    setIsDrawerOpen(false); setReservationDate(""); setReservationTime(""); setIsLoading(false);
   };
 
   const handleCancelReservation = (reservationId: number) => {
@@ -68,91 +64,92 @@ export const ReservationsScreen = () => {
     toast({ title: "Reserva cancelada", variant: "destructive" });
   };
 
-  const formatDate = (dateString: string) => new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR');
+  const formatDate = (dateString: string) => new Date(dateString + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <>
       <div className="min-h-screen bg-background p-4 pb-20">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6 pt-4">
-            <h1 className="text-2xl font-bold text-foreground">Reservar Ambientes</h1>
-            <p className="text-muted-foreground text-sm mt-1">Veja os espaços e gerencie suas reservas.</p>
+            <h1 className="text-2xl font-bold text-foreground">Reservas de Ambientes</h1>
+            <p className="text-muted-foreground text-sm mt-1">Escolha um espaço ou gerencie suas reservas.</p>
           </div>
 
-          {/* Minhas Reservas */}
-          <section className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" /> Minhas Reservas
-            </h2>
-            <Card className="app-card">
-              <CardContent className="p-4 space-y-3">
-                {myReservations.length > 0 ? (
-                  myReservations.map((res) => (
-                    <div key={res.id} className="p-3 rounded-lg bg-background border border-border flex justify-between items-center">
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">{res.environmentName}</p>
-                        <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-                          <Calendar size={12} /> {formatDate(res.date)} <Clock size={12} /> {res.time}
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCancelReservation(res.id)}>
-                        <X className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-muted-foreground py-4 text-sm">Nenhuma reserva ativa.</p>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* Ambientes Disponíveis */}
-          <section>
-            <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-              <Building className="h-5 w-5 text-primary" /> Espaços Disponíveis
-            </h2>
-            <div className="space-y-4">
+          <Tabs defaultValue="reservar" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="reservar"><Building className="h-4 w-4 mr-2"/> Reservar</TabsTrigger>
+              <TabsTrigger value="minhas-reservas"><ListChecks className="h-4 w-4 mr-2"/> Minhas Reservas</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="reservar" className="mt-6 space-y-4">
               {environments.map((env) => (
                 <Card key={env.id} className="app-card flex flex-col">
                   <CardHeader>
-                    <CardTitle className="flex justify-between items-start text-base">
-                      {env.name}
-                      <Badge variant={env.available ? "default" : "secondary"}>{env.available ? "Disponível" : "Indisponível"}</Badge>
-                    </CardTitle>
+                    <CardTitle className="flex justify-between items-start text-base">{env.name}<Badge variant={env.available ? "default" : "secondary"}>{env.available ? "Disponível" : "Indisponível"}</Badge></CardTitle>
                     <CardDescription className="text-xs">{env.description}</CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-grow">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Users className="h-4 w-4 mr-2" />
-                      Capacidade para {env.capacity} pessoas
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full app-button" disabled={!env.available} onClick={() => handleOpenModal(env)}>
-                      Reservar
-                    </Button>
-                  </CardFooter>
+                  <CardContent className="flex-grow"><div className="flex items-center text-xs text-muted-foreground"><Users className="h-4 w-4 mr-2" />Capacidade para {env.capacity} pessoas</div></CardContent>
+                  <CardFooter><Button className="w-full app-button" disabled={!env.available} onClick={() => handleOpenDrawer(env)}>Fazer Reserva</Button></CardFooter>
                 </Card>
               ))}
-            </div>
-          </section>
+            </TabsContent>
+
+            <TabsContent value="minhas-reservas" className="mt-6">
+              {myReservations.length > 0 ? (
+                <Accordion type="single" collapsible className="w-full">
+                  {myReservations.map((res) => (
+                    <AccordionItem key={res.id} value={`item-${res.id}`} className="app-card mb-3 rounded-xl border">
+                      <AccordionTrigger className="p-4 text-left hover:no-underline">
+                        <div>
+                          <p className="font-semibold text-foreground text-base">{res.environmentName}</p>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                            <Calendar size={14} /> {formatDate(res.date)}
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4">
+                        <div className="border-t pt-4 space-y-3">
+                          <h4 className="font-semibold text-sm">Detalhes da Reserva:</h4>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2"><Clock size={14} /> Horário: {res.time}</div>
+                          <div className="text-sm text-muted-foreground flex items-center gap-2"><Copy size={14} /> Cód: {res.confirmationCode}</div>
+                          <div className="text-sm text-muted-foreground flex items-start gap-2"><Info size={14} className="mt-0.5"/> Regras: {environments.find(e => e.name === res.environmentName)?.rules.join(' ')}</div>
+                          <Button variant="destructive" size="sm" className="w-full mt-2" onClick={() => handleCancelReservation(res.id)}>
+                            <X className="h-4 w-4 mr-2" /> Cancelar Reserva
+                          </Button>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center text-muted-foreground py-12 px-4">
+                  <ListChecks className="mx-auto h-12 w-12 text-gray-300" />
+                  <h3 className="mt-2 text-sm font-semibold text-gray-900">Nenhuma reserva ativa</h3>
+                  <p className="mt-1 text-sm text-gray-500">Vá para a aba "Reservar" para agendar um espaço.</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="app-card max-w-sm mx-auto">
-          <DialogHeader><DialogTitle>Reservar {selectedEnvironment?.name}</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2"><Label htmlFor="date">Data</Label><Input id="date" type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} className="app-input" min={new Date().toISOString().split('T')[0]} /></div>
-            <div className="space-y-2"><Label htmlFor="time">Horário</Label><Input id="time" type="time" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="app-input" /></div>
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1" disabled={isLoading}>Cancelar</Button>
-              <Button onClick={handleConfirmReservation} className="flex-1 app-button" disabled={isLoading}>{isLoading ? "Confirmando..." : "Confirmar"}</Button>
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>Reservar {selectedEnvironment?.name}</DrawerTitle>
+            </DrawerHeader>
+            <div className="p-4 space-y-4">
+              <div className="space-y-2"><Label htmlFor="date">Data</Label><Input id="date" type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} className="app-input" min={new Date().toISOString().split('T')[0]} /></div>
+              <div className="space-y-2"><Label htmlFor="time">Horário</Label><Input id="time" type="time" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="app-input" /></div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1" disabled={isLoading}>Cancelar</Button>
+                <Button onClick={handleConfirmReservation} className="flex-1 app-button" disabled={isLoading}>{isLoading ? "Confirmando..." : "Confirmar"}</Button>
+              </div>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 };

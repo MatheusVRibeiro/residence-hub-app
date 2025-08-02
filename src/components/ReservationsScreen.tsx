@@ -3,7 +3,7 @@ import { Calendar, Clock, Users, X, Building, ListChecks, Info, Copy } from "luc
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -97,9 +97,9 @@ export const ReservationsScreen = () => {
 
             <TabsContent value="minhas-reservas" className="mt-6">
               {myReservations.length > 0 ? (
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full space-y-3">
                   {myReservations.map((res) => (
-                    <AccordionItem key={res.id} value={`item-${res.id}`} className="app-card mb-3 rounded-xl border">
+                    <AccordionItem key={res.id} value={`item-${res.id}`} className="app-card rounded-xl border">
                       <AccordionTrigger className="p-4 text-left hover:no-underline">
                         <div>
                           <p className="font-semibold text-foreground text-base">{res.environmentName}</p>
@@ -115,7 +115,6 @@ export const ReservationsScreen = () => {
                           <div className="text-sm text-muted-foreground flex items-center gap-2"><Copy size={14} /> Cód: {res.confirmationCode}</div>
                           <div className="text-sm text-muted-foreground flex items-start gap-2"><Info size={14} className="mt-0.5"/> Regras: {environments.find(e => e.name === res.environmentName)?.rules.join(' ')}</div>
                           
-                          {/* --- ALTERAÇÃO AQUI: AlertDialog adicionado --- */}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="destructive" size="sm" className="w-full mt-2">
@@ -137,8 +136,6 @@ export const ReservationsScreen = () => {
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                          {/* --- FIM DA ALTERAÇÃO --- */}
-
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -159,17 +156,28 @@ export const ReservationsScreen = () => {
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
-            <DrawerHeader>
+            <DrawerHeader className="text-left">
               <DrawerTitle>Reservar {selectedEnvironment?.name}</DrawerTitle>
+              <DrawerDescription>Preencha os dados para agendar o espaço.</DrawerDescription>
             </DrawerHeader>
             <div className="p-4 space-y-4">
-              <div className="space-y-2"><Label htmlFor="date">Data</Label><Input id="date" type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} className="app-input" min={new Date().toISOString().split('T')[0]} /></div>
-              <div className="space-y-2"><Label htmlFor="time">Horário</Label><Input id="time" type="time" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="app-input" /></div>
-              <div className="flex gap-2 pt-4">
-                <Button variant="outline" onClick={() => setIsDrawerOpen(false)} className="flex-1" disabled={isLoading}>Cancelar</Button>
-                <Button onClick={handleConfirmReservation} className="flex-1 app-button" disabled={isLoading}>{isLoading ? "Confirmando..." : "Confirmar"}</Button>
+              <div className="space-y-2">
+                <Label htmlFor="date">Data da Reserva</Label>
+                <Input id="date" type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} className="app-input" min={new Date().toISOString().split('T')[0]} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time">Horário de Início</Label>
+                <Input id="time" type="time" value={reservationTime} onChange={(e) => setReservationTime(e.target.value)} className="app-input" />
               </div>
             </div>
+            <DrawerFooter>
+              <Button onClick={handleConfirmReservation} className="app-button" disabled={isLoading}>
+                {isLoading ? "Confirmando..." : "Confirmar Reserva"}
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancelar</Button>
+              </DrawerClose>
+            </DrawerFooter>
           </div>
         </DrawerContent>
       </Drawer>

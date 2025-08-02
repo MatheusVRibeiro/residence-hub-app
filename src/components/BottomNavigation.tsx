@@ -1,8 +1,8 @@
 import { Home, Calendar, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Tab } from "@/pages/Index"; // 1. IMPORTE O TIPO COMPARTILHADO
+import type { Tab } from "@/pages/Index"; // 1. IMPORTA O TIPO DO INDEX
 
-// 2. REMOVA A DEFINIÇÃO ANTIGA QUE ESTAVA AQUI
+// 2. A DEFINIÇÃO LOCAL DO TIPO 'Tab' FOI REMOVIDA DAQUI
 
 interface BottomNavigationProps {
   activeTab: Tab;
@@ -10,7 +10,6 @@ interface BottomNavigationProps {
 }
 
 export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationProps) => {
-  // Apenas as abas visíveis na barra de navegação
   const navTabs = [
     { id: 'dashboard' as const, label: 'Início', icon: Home },
     { id: 'reservations' as const, label: 'Reservas', icon: Calendar },

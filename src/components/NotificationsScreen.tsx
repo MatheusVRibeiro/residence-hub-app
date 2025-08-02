@@ -3,10 +3,9 @@ import { Bell, AlertTriangle, Info, CheckCircle, Clock, Search, MapPin } from "l
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
-import { useToast } from "@/hooks/use-toast";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
+import { toast } from "sonner";
 
 // --- Tipos e Dados Mockados ---
 type Priority = 'alta' | 'media' | 'baixa';
@@ -28,24 +27,23 @@ interface Notification {
 }
 
 const initialNotifications: Notification[] = [
-  { id: 1, title: "Assembleia Geral Convocada", message: "Pauta: aprovação do orçamento anual...", fullMessage: "Convocamos todos os moradores para a assembleia geral obrigatória que acontecerá no Salão de Festas. A pauta principal será a discussão e aprovação do orçamento para o próximo ano.", date: "2025-08-15", time: "19:30", type: 'urgent', read: false, priority: 'alta', location: "Salão de Festas" },
-  { id: 2, title: "Manutenção - Elevador A", message: "O elevador A passará por manutenção preventiva...", fullMessage: "Para garantir a segurança de todos, o elevador do Bloco A passará por uma manutenção preventiva agendada. Por favor, utilizem o elevador do Bloco B ou as escadas durante este período.", date: "2025-08-12", time: "08:00", type: 'warning', read: false, priority: 'media', location: "Elevador - Bloco A", startTime: "08:00", endTime: "17:00" },
-  { id: 3, title: "Nova Regra para Pets", message: "A partir de 01/09, será obrigatório o uso de coleira...", fullMessage: "A partir de 01/09/2025, será obrigatório o uso de coleira para todos os pets nas áreas comuns do condomínio, visando a segurança e bem-estar de todos.", date: "2025-07-28", time: "16:45", type: 'info', read: true, priority: 'media', location: "Áreas Comuns" },
-  { id: 4, title: "Dedetização Concluída", message: "As áreas comuns foram dedetizadas com sucesso.", fullMessage: "Informamos que a dedetização programada para as áreas comuns foi concluída com sucesso. Agradecemos a colaboração de todos.", date: "2025-07-27", time: "11:20", type: 'success', read: true, priority: 'baixa' }
+    { id: 1, title: "Assembleia Geral Convocada", message: "Pauta: aprovação do orçamento anual...", fullMessage: "Convocamos todos os moradores para a assembleia geral obrigatória que acontecerá no Salão de Festas. A pauta principal será a discussão e aprovação do orçamento para o próximo ano.", date: "2025-08-15", time: "19:30", type: 'urgent', read: false, priority: 'alta', location: "Salão de Festas" },
+    { id: 2, title: "Manutenção - Elevador Bloco A", message: "O elevador passará por manutenção preventiva...", fullMessage: "Para garantir a segurança de todos, o elevador do Bloco A passará por uma manutenção preventiva agendada. Por favor, utilizem o elevador do Bloco B ou as escadas durante este período.", date: "2025-08-12", time: "08:00", type: 'warning', read: false, priority: 'media', location: "Elevador - Bloco A", startTime: "08:00", endTime: "17:00" },
+    { id: 3, title: "Nova Regra para Pets", message: "A partir de 01/09, será obrigatório o uso de coleira...", fullMessage: "A partir de 01/09/2025, será obrigatório o uso de coleira para todos os pets nas áreas comuns do condomínio, visando a segurança e bem-estar de todos.", date: "2025-07-28", time: "16:45", type: 'info', read: true, priority: 'media', location: "Áreas Comuns" },
+    { id: 4, title: "Dedetização Concluída", message: "As áreas comuns foram dedetizadas com sucesso.", fullMessage: "Informamos que a dedetização programada para as áreas comuns foi concluída com sucesso no dia 27/07. Agradecemos a colaboração de todos.", date: "2025-07-27", time: "11:20", type: 'success', read: true, priority: 'baixa' }
 ];
 
 // --- Tela Principal ---
 export const NotificationsScreen = () => {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
-  const { toast } = useToast();
 
   const handleMarkAsRead = (id: number) => {
     setNotifications(current => current.map(n => n.id === id ? { ...n, read: true } : n));
     if (selectedNotification?.id === id) {
       setSelectedNotification(prev => prev ? { ...prev, read: true } : null);
     }
+    toast.success("Aviso marcado como lido.");
   };
   
   const handleCardClick = (notification: Notification) => {
@@ -54,17 +52,11 @@ export const NotificationsScreen = () => {
 
   const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
 
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter(n => 
-      n.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      n.message.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [notifications, searchTerm]);
-
   const renderNotificationList = (priority?: Priority) => {
-    const list = priority ? filteredNotifications.filter(n => n.priority === priority) : filteredNotifications;
-    if (list.length === 0) return <p className="text-center text-muted-foreground py-8">Nenhum aviso encontrado.</p>;
-    
+    const list = priority ? notifications.filter(n => n.priority === priority) : notifications;
+    if (list.length === 0) {
+      return <p className="text-center text-muted-foreground py-8">Nenhum aviso encontrado nesta categoria.</p>;
+    }
     return list.map(notification => (
       <NotificationCard key={notification.id} notification={notification} onClick={() => handleCardClick(notification)} />
     ));
@@ -79,11 +71,6 @@ export const NotificationsScreen = () => {
               <Bell className="h-6 w-6 text-primary" /> Avisos e Notificações
             </h1>
             {unreadCount > 0 && <p className="text-muted-foreground text-sm">Você tem {unreadCount} {unreadCount === 1 ? 'aviso não lido' : 'avisos não lidos'}</p>}
-          </div>
-
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Buscar por palavra-chave..." className="app-input pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
 
           <Tabs defaultValue="todos" className="w-full">
@@ -102,7 +89,6 @@ export const NotificationsScreen = () => {
         </div>
       </div>
 
-      {/* Drawer para Detalhes da Notificação */}
       <Drawer open={!!selectedNotification} onOpenChange={(isOpen) => !isOpen && setSelectedNotification(null)}>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
@@ -127,7 +113,6 @@ export const NotificationsScreen = () => {
                     </div>
                 </div>
               )}
-
               {selectedNotification?.startTime && (
                  <div className="flex items-start gap-3 text-sm">
                     <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
@@ -137,16 +122,17 @@ export const NotificationsScreen = () => {
                     </div>
                 </div>
               )}
-              
+            </div>
+            <DrawerFooter>
               {!selectedNotification?.read && (
-                <Button className="w-full mt-4" onClick={() => {
-                  handleMarkAsRead(selectedNotification.id);
-                  toast({ title: "Aviso marcado como lido." });
-                }}>
+                <Button className="w-full" onClick={() => handleMarkAsRead(selectedNotification!.id)}>
                   <CheckCircle className="h-4 w-4 mr-2" /> Marcar como lido
                 </Button>
               )}
-            </div>
+               <DrawerClose asChild>
+                <Button variant="outline">Fechar</Button>
+              </DrawerClose>
+            </DrawerFooter>
           </div>
         </DrawerContent>
       </Drawer>
@@ -173,14 +159,15 @@ const NotificationCard = ({ notification, onClick }) => {
   return (
     <Card 
       onClick={onClick}
-      className={`app-card transition-all duration-300 cursor-pointer hover:bg-primary/10 ${!notification.read ? 'bg-primary/5 border-l-4 border-primary' : 'bg-card'}`}
+      className={`app-card transition-all duration-300 cursor-pointer hover:shadow-lg hover:-translate-y-1 ${!notification.read ? 'bg-primary/5 border-l-4 border-primary' : 'bg-card'}`}
+      aria-label={`Aviso: ${notification.title}. Prioridade: ${priorityInfo[notification.priority].label}.`}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           <div className="mt-1">{getNotificationIcon(notification.type)}</div>
           <div className="flex-1 space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="font-bold text-foreground leading-tight">{notification.title}</h3>
+              <h3 className="font-bold text-foreground text-base leading-tight">{notification.title}</h3>
               <Badge variant={priorityInfo[notification.priority].variant as any}>{priorityInfo[notification.priority].label}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">{notification.message}</p>

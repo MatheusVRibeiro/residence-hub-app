@@ -91,7 +91,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onForgotPassw
               <Checkbox id="remember" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
               <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700">Lembrar-me</Label>
             </div>
-            {/* CORREÇÃO APLICADA AQUI */}
             <Button type="button" variant="link" className="text-primary text-sm p-0 h-auto font-semibold" onClick={onForgotPassword}>
               Esqueci a senha?
             </Button>

@@ -1,8 +1,6 @@
-import { Home, Calendar, Bell, User } from "lucide-react";
+import { Home, Calendar, User, MessageSquareWarning } from "lucide-react"; // 1. Trocamos Bell por MessageSquareWarning
 import { Button } from "@/components/ui/button";
-import type { Tab } from "@/pages/Index"; // 1. IMPORTA O TIPO DO INDEX
-
-// 2. A DEFINIÇÃO LOCAL DO TIPO 'Tab' FOI REMOVIDA DAQUI
+import type { Tab } from "@/pages/Index";
 
 interface BottomNavigationProps {
   activeTab: Tab;
@@ -13,7 +11,8 @@ export const BottomNavigation = ({ activeTab, onTabChange }: BottomNavigationPro
   const navTabs = [
     { id: 'dashboard' as const, label: 'Início', icon: Home },
     { id: 'reservations' as const, label: 'Reservas', icon: Calendar },
-    { id: 'notifications' as const, label: 'Avisos', icon: Bell },
+    // 2. A linha abaixo foi alterada
+    { id: 'issues' as const, label: 'Ocorrências', icon: MessageSquareWarning },
     { id: 'profile' as const, label: 'Perfil', icon: User },
   ];
 

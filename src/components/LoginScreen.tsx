@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, LogIn, Building } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 interface LoginScreenProps {
-  onLogin: (email: string) => void;
+  onLogin: (email: string, password: string) => Promise<boolean>;
   onForgotPassword: () => void;
 }
 
@@ -22,25 +22,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onForgotPassw
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password) {
       toast.error("Por favor, preencha todos os campos.");
       return;
     }
-
     setIsLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      if (password !== "123456") {
-        throw new Error("Senha incorreta");
-      }
-      toast.success("Login realizado com sucesso!", { description: "Bem-vindo(a)!" });
-      onLogin(email);
-    } catch (err) {
-      toast.error("E-mail ou senha incorretos", { description: "Verifique seus dados." });
-    } finally {
-      setIsLoading(false);
-    }
+    await onLogin(email, password);
+    setIsLoading(false);
   };
 
   return (
@@ -55,7 +43,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onForgotPassw
           </div>
         </div>
 
-        {/* Formulário com a correção aplicada */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <Label htmlFor="email" className="block text-gray-600 text-sm font-medium mb-2">E-mail</Label>
@@ -104,7 +91,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onForgotPassw
               <Checkbox id="remember" checked={rememberMe} onCheckedChange={(checked) => setRememberMe(!!checked)} />
               <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700">Lembrar-me</Label>
             </div>
-            <Button variant="link" className="text-primary text-sm p-0 h-auto font-semibold" onClick={onForgotPassword}>
+            {/* CORREÇÃO APLICADA AQUI */}
+            <Button type="button" variant="link" className="text-primary text-sm p-0 h-auto font-semibold" onClick={onForgotPassword}>
               Esqueci a senha?
             </Button>
           </div>

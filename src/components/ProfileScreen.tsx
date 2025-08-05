@@ -1,36 +1,38 @@
 import React from 'react';
-import { User, Car, FileText, Settings, HelpCircle, LogOut, ChevronRight, Mail, Phone, MapPin } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Car, FileText, Settings, HelpCircle, LogOut, ChevronRight, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { InfoItem } from "./InfoItem";
+import { ActionList } from "./ActionList";
+import { userProfile } from '@/lib/mocks'; // Importação dos dados mockados
 
 interface ProfileScreenProps {
   userEmail: string;
   onLogout: () => void;
 }
 
-// Mock Data
-const userProfile = {
-  name: "Ana Clara",
-  email: "ana.clara@email.com",
-  phone: "(11) 98765-4321",
-  apartment: "Apto 72",
-  block: "Bloco B",
-  avatarUrl: "https://i.pravatar.cc/150?u=ana",
-  initials: "AC",
-  vehicles: [
-    { id: 1, model: "Honda Civic", plate: "BRA2E19", type: "Carro" },
-    { id: 2, model: "Honda PCX", plate: "RIO2A18", type: "Moto" },
-  ],
-  documents: [
-    { id: 1, name: "Regimento Interno.pdf", category: "Regras" },
-    { id: 2, name: "Ata da Última Assembleia.pdf", category: "Assembleias" },
-  ]
-};
-
 export const ProfileScreen = ({ onLogout }: ProfileScreenProps) => {
+
+  const profileActions = [
+    {
+      label: 'Configurações',
+      icon: Settings,
+      onClick: () => console.log('Configurações clicked'),
+    },
+    {
+      label: 'Ajuda e Suporte',
+      icon: HelpCircle,
+      onClick: () => console.log('Ajuda e Suporte clicked'),
+    },
+    {
+      label: 'Sair da Conta',
+      icon: LogOut,
+      onClick: onLogout,
+      variant: 'destructive' as const,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background p-4 pb-20">
@@ -106,26 +108,8 @@ export const ProfileScreen = ({ onLogout }: ProfileScreenProps) => {
         </Accordion>
         
         {/* Botões de Ação */}
-        <div className="space-y-2 pt-4">
-            <Button variant="outline" className="w-full justify-start gap-3 text-base py-6">
-              <Settings className="h-5 w-5" /> Configurações
-            </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 text-base py-6">
-              <HelpCircle className="h-5 w-5" /> Ajuda e Suporte
-            </Button>
-            <Button variant="destructive" className="w-full justify-start gap-3 text-base py-6" onClick={onLogout}>
-              <LogOut className="h-5 w-5" /> Sair da Conta
-            </Button>
-        </div>
+        <ActionList actions={profileActions} />
       </div>
     </div>
   );
 };
-
-// Componente auxiliar para itens de informação
-const InfoItem = ({ icon: Icon, value }) => (
-  <div className="flex items-center gap-3 text-sm p-3 rounded-lg bg-background border border-border">
-    <Icon className="h-4 w-4 text-muted-foreground" />
-    <span className="text-foreground">{value}</span>
-  </div>
-);
